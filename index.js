@@ -16,7 +16,20 @@ const app = express()
 app.use(express.json())
 
 
+app.post('/auth/login', async (req, res)=>{
+    try{
+        const user = await UserModel.findOne({email: req.body.email})
+        if(!user) {
+            res.status(404).json({
+                message: 'User is not found'
+            })
+        }
+        const isValidPass = await bcrypt.compare(req.body.password, user._doc.passwordHash)
 
+    } catch(err) {
+
+    }
+})
 
 
 app.post('/auth/register', registerValidattion, async (req, res)=>{
@@ -28,14 +41,14 @@ app.post('/auth/register', registerValidattion, async (req, res)=>{
     
         const password = req.body.password;
         const salt = await bcrypt.genSalt(10);
-        const passwordHash = await bcrypt.hash(password, salt);
+        const hash = await bcrypt.hash(password, salt);
     
     
         const doc = new UserModel({
             email: req.body.email,
             fullName: req.body.fullName,        
             avatarUrl: req.body.avatarUrl,
-            passwordHash,
+            passwordHash: hash,
         });
     
         const user = await doc.save();
@@ -50,8 +63,10 @@ app.post('/auth/register', registerValidattion, async (req, res)=>{
             },
         );
 
+        const {passwordHash, ...userData} = user._doc;
+
         res.json({
-                ...user._doc,
+                ...userData,
                 token,
             });
 
@@ -62,10 +77,6 @@ app.post('/auth/register', registerValidattion, async (req, res)=>{
         })
     }
 })
-
-
-
-
 
 
 app.listen(4444, (err)=>{
