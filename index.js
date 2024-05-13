@@ -24,10 +24,34 @@ app.post('/auth/login', async (req, res)=>{
                 message: 'User is not found'
             })
         }
-        const isValidPass = await bcrypt.compare(req.body.password, user._doc.passwordHash)
+        const isValidPass = await bcrypt.compare(req.body.password, user._doc.passwordHash);
+        if(!isValidPass){
+            return res.status(400).json({
+                message: 'Wrong login or password'
+            })
+        }
+
+        const token = jwt.sign(
+            {
+                _id: user._id,
+            }, 
+            'secret123',
+            {
+                expiresIn:'30d',
+            },
+        );
+
+        const {passwordHash, ...userData} = user._doc;
+        res.json({
+                ...userData,
+                token,
+            });
 
     } catch(err) {
-
+        console.log(err);
+        res.status(500).json({
+            message: "Failed to log in"
+        })
     }
 })
 
