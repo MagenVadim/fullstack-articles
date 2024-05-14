@@ -6,6 +6,8 @@ import {validationResult} from 'express-validator';
 import bcrypt from 'bcrypt'
 import {registerValidattion} from './validations/auth.js';
 import UserModel from './models/User.js'
+import checkAuth from './utils/checkAuth.js';
+
 
 mongoose
 .connect('mongodb+srv://magenvadim:X7LJbTLyB1gsr5BG@cluster0.bjxlrug.mongodb.net/blog?retryWrites=true&w=majority&appName=Cluster0')
@@ -55,7 +57,6 @@ app.post('/auth/login', async (req, res)=>{
     }
 })
 
-
 app.post('/auth/register', registerValidattion, async (req, res)=>{
     try {
         const errors = validationResult(req);
@@ -88,7 +89,6 @@ app.post('/auth/register', registerValidattion, async (req, res)=>{
         );
 
         const {passwordHash, ...userData} = user._doc;
-
         res.json({
                 ...userData,
                 token,
@@ -101,6 +101,25 @@ app.post('/auth/register', registerValidattion, async (req, res)=>{
         })
     }
 })
+
+app.get('/auth/me', checkAuth , async (req, res)=>{    
+    try{
+        const user = await UserModel.findById(req.userId);
+        if(!user){
+            return res.status(404).json({
+                message: 'User is not found'
+            })
+        }
+        const {passwordHash, ...userData} = user._doc;
+        res.json({userData});
+
+    } catch(err) {
+        console.log(err);
+        res.status(500).json({
+            message: "Forbidden"
+        })
+    }
+});
 
 
 app.listen(4444, (err)=>{
