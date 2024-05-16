@@ -1,8 +1,9 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import {registerValidattion} from './validations/auth.js';
+import {registerValidattion, loginValidattion, postCreateValidattion} from './validations.js';
 import checkAuth from './utils/checkAuth.js';
 import * as UserController from './controllers/UserController.js'
+import * as PostController from './controllers/PostController.js'
 
 mongoose
 .connect('mongodb+srv://magenvadim:X7LJbTLyB1gsr5BG@cluster0.bjxlrug.mongodb.net/blog?retryWrites=true&w=majority&appName=Cluster0')
@@ -13,12 +14,14 @@ const app = express()
 app.use(express.json())
 
 
-app.post('/auth/login', UserController.login)
-
+app.post('/auth/login', loginValidattion, UserController.login)
 app.post('/auth/register', registerValidattion, UserController.register)
-
 app.get('/auth/me', checkAuth , UserController.getMe);
-
+app.get('/posts', PostController.getAll);
+app.get('/posts/:id', PostController.getOne);
+app.post('/posts', checkAuth, postCreateValidattion, PostController.create);
+app.delete('/posts/:id', checkAuth, PostController.remove);
+app.patch('/posts/:id', checkAuth, PostController.update);
 
 app.listen(4444, (err)=>{
     if(err){return console.log(err)}
