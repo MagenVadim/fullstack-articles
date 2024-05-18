@@ -1,11 +1,9 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import {registerValidattion, loginValidattion, postCreateValidattion} from './validations.js';
-import checkAuth from './utils/checkAuth.js';
-import * as UserController from './controllers/UserController.js'
-import * as PostController from './controllers/PostController.js'
 import multer from 'multer'
-import handleValidationErrors from './utils/handleValidationErrors.js';
+import {registerValidattion, loginValidattion, postCreateValidattion} from './validations.js';
+import {UserController, PostController} from './controllers/indexs.js';
+import {checkAuth, handleValidationErrors} from './utils/index.js';
 
 
 mongoose
@@ -47,9 +45,9 @@ app.post('/upload', checkAuth, upload, function (req, res, next) {
 
 app.get('/posts', PostController.getAll);
 app.get('/posts/:id', PostController.getOne);
-app.post('/posts', checkAuth, postCreateValidattion, PostController.create);
+app.post('/posts', checkAuth, postCreateValidattion, handleValidationErrors, PostController.create);
 app.delete('/posts/:id', checkAuth, PostController.remove);
-app.patch('/posts/:id', checkAuth, PostController.update);
+app.patch('/posts/:id', checkAuth, postCreateValidattion, handleValidationErrors, PostController.update);
 
 app.listen(4444, (err)=>{
     if(err){return console.log(err)}
