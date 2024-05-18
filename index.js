@@ -5,6 +5,7 @@ import checkAuth from './utils/checkAuth.js';
 import * as UserController from './controllers/UserController.js'
 import * as PostController from './controllers/PostController.js'
 import multer from 'multer'
+import handleValidationErrors from './utils/handleValidationErrors.js';
 
 
 mongoose
@@ -25,12 +26,12 @@ const storage = multer.diskStorage({
 })
 
 app.use(express.json());
-app.use('/uploads', express.static('uploads'))
+app.use('/uploads', express.static('uploads'));
 
 
 
-app.post('/auth/login', loginValidattion, UserController.login)
-app.post('/auth/register', registerValidattion, UserController.register)
+app.post('/auth/login', loginValidattion, handleValidationErrors, UserController.login)
+app.post('/auth/register', registerValidattion, handleValidationErrors, UserController.register)
 app.get('/auth/me', checkAuth , UserController.getMe);
 
 
