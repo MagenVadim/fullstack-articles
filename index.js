@@ -6,6 +6,7 @@ import * as UserController from './controllers/UserController.js'
 import * as PostController from './controllers/PostController.js'
 import multer from 'multer'
 
+
 mongoose
 .connect('mongodb+srv://magenvadim:X7LJbTLyB1gsr5BG@cluster0.bjxlrug.mongodb.net/blog?retryWrites=true&w=majority&appName=Cluster0')
 .then(()=>console.log('DB is ok'))
@@ -23,16 +24,19 @@ const storage = multer.diskStorage({
     }
 })
 
-const upload = multer({storage: storage}).single('image');
+app.use(express.json());
+app.use('/uploads', express.static('uploads'))
 
-app.use(express.json())
+
 
 app.post('/auth/login', loginValidattion, UserController.login)
 app.post('/auth/register', registerValidattion, UserController.register)
 app.get('/auth/me', checkAuth , UserController.getMe);
 
 
-app.post('/upload', checkAuth, upload, (res, req)=>{
+const upload = multer({storage: storage}).single('image');
+
+app.post('/upload', checkAuth, upload, function (req, res, next) {
     res.json({
         url: `/uploads/${req.file.originalname}`,
     })
